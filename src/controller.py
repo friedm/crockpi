@@ -7,6 +7,7 @@ class Controller:
         self.__sensor = TempSensor()
         self.__values = values
         self.__start_time = time.time()
+        self.__stop = False
 
     def run(self, target_temp):
         """
@@ -24,9 +25,10 @@ class Controller:
         with PowerSupply() as supply:
             self.regulate(target_temp, supply)
 
+
     def regulate(self, target_temp, supply):
-        while (True):
-            time.sleep(1)
+        while not self.__stop:
+            time.sleep(3)
 
             actual_temp = self.__sensor.read()
             print("actual temp:", actual_temp)
@@ -35,6 +37,10 @@ class Controller:
             self.__values.append((time.time() - self.__start_time,
                 self.__sensor.read()))
 
+
+    def stop(self):
+        print("stopping controller...")
+        self.__stop = True
 
 
 

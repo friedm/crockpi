@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 
 import sys
+import signal
 import time
 from threading import Thread
 
@@ -11,6 +12,7 @@ from controller import Controller
 
 app = Flask(__name__)
 data = []
+stop_controlling = False
 
 @app.route('/')
 def index():
@@ -33,10 +35,17 @@ class ControllerThread(Thread):
         Thread.__init__(self)
         self.data = data
         self.target = target
+        self.controller = Controller(values=self.data)
 
     def run(self):
-        controller = Controller(values=data)
-        controller.run(self.target)
+        self.controller.run(self.target)
+
+    def stop(self):
+        controller.stop()
+
+def exit_handler(signal, frame):
+    controller_thread.stop()
+    sys.exit(0)
 
 if __name__ == '__main__':
     if len(sys.argv) != 2:
@@ -44,8 +53,9 @@ if __name__ == '__main__':
         sys.exit(0)
 
     target_temp = int(sys.argv[1])
-    t = ControllerThread(data,target_temp)
-    t.start()
+    controller_thread = ControllerThread(data,target_temp)
+    signal.signal(signal.SIGINT, exit_handler)
+    controller_thread.start()
     app.config['TARGET_TEMP'] = target_temp
     app.run(host='0.0.0.0', port=6080)
 
