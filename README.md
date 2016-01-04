@@ -26,6 +26,8 @@ sensor, and a relay.
 * python 3
 * wiringpi
 * python RPi.GPIO module
+* pygal
+* flask
 
 ## See Also
 

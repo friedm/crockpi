@@ -1,0 +1,63 @@
+#!/usr/bin/python3
+
+import time
+from threading import Thread
+
+from flask import Flask
+import pygal
+
+from tempsensor import TempSensor
+
+app = Flask(__name__)
+data = []
+
+# TODO
+# * automatically update chart
+# * mysql database recording temps while controlling
+# * config for temperature sensor dir and relay gpio
+# * prettify web output
+# * also log enable/disable state of controller
+
+@app.route('/')
+def index():
+    chart = pygal.XY()
+    chart.title = 'Measured Temperature'
+    chart.show_legend = False
+    chart.x_title='Seconds Since Start'
+    chart.y_title='Temperature in Fahrenheit'
+    chart.style = pygal.style.CleanStyle()
+    chart.add('Temperature', data)
+
+    html = """
+        <html>
+            <head>
+                <title>crockpi</title>
+            </head>
+            <body>
+                <div id=chart>
+                    {chart}
+                </div>
+            </body>
+        </html>
+        """.format(chart=chart.render().decode("utf-8"))
+    return html
+
+class TempMonitor(Thread):
+    def __init__(self, data):
+        Thread.__init__(self)
+        self.start_time = time.time()
+        self.data = data
+        self.sensor = TempSensor()
+
+    def run(self):
+        while True:
+            time.sleep(1)
+            self.data.append((time.time() - self.start_time,
+                self.sensor.read()))
+
+if __name__ == '__main__':
+    t = TempMonitor(data)
+    t.start()
+    app.run(host='0.0.0.0', port=80, debug=True)
+
+
