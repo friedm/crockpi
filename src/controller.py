@@ -3,8 +3,10 @@ from powersupply import PowerSupply
 from tempsensor import TempSensor
 
 class Controller:
-    def __init__(self):
+    def __init__(self,values=None):
         self.__sensor = TempSensor()
+        self.__values = values
+        self.__start_time = time.time()
 
     def run(self, target_temp):
         """
@@ -30,6 +32,10 @@ class Controller:
             print("actual temp:", actual_temp)
 
             supply.set(target_temp > actual_temp)
+            self.__values.append((time.time() - self.__start_time,
+                self.__sensor.read()))
+
+
 
 
 

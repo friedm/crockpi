@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 
+import sys
 import time
 from threading import Thread
 
@@ -7,6 +8,7 @@ from flask import Flask
 import pygal
 
 from tempsensor import TempSensor
+from controller import Controller
 
 app = Flask(__name__)
 data = []
@@ -34,30 +36,34 @@ def index():
                 <title>crockpi</title>
             </head>
             <body>
+                Target Temp: {target} degrees fahrenheit
                 <div id=chart>
                     {chart}
                 </div>
             </body>
         </html>
-        """.format(chart=chart.render().decode("utf-8"))
+        """.format(target=app.config['TARGET_TEMP'],chart=chart.render().decode("utf-8"))
     return html
 
-class TempMonitor(Thread):
-    def __init__(self, data):
+class ControllerThread(Thread):
+    def __init__(self, data, target):
         Thread.__init__(self)
-        self.start_time = time.time()
         self.data = data
         self.sensor = TempSensor()
+        self.target = target
 
     def run(self):
-        while True:
-            time.sleep(1)
-            self.data.append((time.time() - self.start_time,
-                self.sensor.read()))
+        controller = Controller(values=data)
+        controller.run(self.target)
 
 if __name__ == '__main__':
-    t = TempMonitor(data)
-    t.start()
-    app.run(host='0.0.0.0', port=80, debug=True)
+    if len(sys.argv) != 2:
+        print("usage:", sys.argv[0], "<target temp (degrees fahrenheit)>")
+        sys.exit(0)
 
+    target_temp = int(sys.argv[1])
+    t = ControllerThread(data,target_temp)
+    t.start()
+    app.config['TARGET_TEMP'] = target_temp
+    app.run(host='0.0.0.0', port=80, debug=True)
 
