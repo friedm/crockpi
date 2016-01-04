@@ -4,7 +4,7 @@ import sys
 import time
 from threading import Thread
 
-from flask import Flask
+from flask import Flask, render_template
 import pygal
 
 from controller import Controller
@@ -14,7 +14,7 @@ data = []
 
 # TODO
 # * automatically update chart
-# * mysql database recording temps while controlling
+# * controller records temps in db
 # * config for temperature sensor dir and relay gpio
 # * prettify web output
 # * also log enable/disable state of controller
@@ -29,20 +29,7 @@ def index():
     chart.style = pygal.style.CleanStyle()
     chart.add('Temperature', data)
 
-    html = """
-        <html>
-            <head>
-                <title>crockpi</title>
-            </head>
-            <body>
-                Target Temp: {target} degrees fahrenheit
-                <div id=chart>
-                    {chart}
-                </div>
-            </body>
-        </html>
-        """.format(target=app.config['TARGET_TEMP'],chart=chart.render().decode("utf-8"))
-    return html
+    return render_template('index.html',target=app.config['TARGET_TEMP'],chart=chart.render().decode("utf-8"))
 
 class ControllerThread(Thread):
     def __init__(self, data, target):
