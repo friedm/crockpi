@@ -12,12 +12,6 @@ from controller import Controller
 app = Flask(__name__)
 data = []
 
-# TODO
-# * controller records temps in db
-# * config for temperature sensor dir and relay gpio
-# * prettify web output
-# * also log enable/disable state of controller
-
 @app.route('/')
 def index():
     return render_template('index.html',target=app.config['TARGET_TEMP'])
