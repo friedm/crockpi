@@ -7,7 +7,6 @@ from threading import Thread
 from flask import Flask
 import pygal
 
-from tempsensor import TempSensor
 from controller import Controller
 
 app = Flask(__name__)
@@ -49,7 +48,6 @@ class ControllerThread(Thread):
     def __init__(self, data, target):
         Thread.__init__(self)
         self.data = data
-        self.sensor = TempSensor()
         self.target = target
 
     def run(self):
