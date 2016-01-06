@@ -67,7 +67,7 @@ def get_chart():
 def history():
     charts = []
     db_lock.acquire()
-    sessions = models.ControlSession.query.all()
+    sessions = models.ControlSession.query.order_by('time desc').limit(5).all()
     db_lock.release()
 
     for session in sessions:
@@ -106,6 +106,7 @@ def chunk(sequence, chunk_size):
 
 def create_chart(session,values):
     chart = pygal.XY()
+    chart.title = 'target temp ' + str(session.target_temp) + 'F ' + session.time.strftime('%m %d %Y %T')
     chart.show_legend = False
     chart.x_title = 'Seconds Since Start'
     chart.y_title = 'Temperature in Fahrenheit'
