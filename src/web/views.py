@@ -51,6 +51,8 @@ def index():
 
 @app.route('/_get_chart')
 def get_chart():
+    ControllerThread.data = shrink_datapoints(ControllerThread.data)
+
     chart = pygal.XY()
     chart.title = 'Current Session'
     chart.show_legend = False
@@ -69,9 +71,30 @@ def history():
         for data in models.Data.query.filter(models.Data.session_id==session.id):
             vals.append((data.seconds_since_start, data.value))
 
-        charts.append(str(create_chart(session,vals)))
+        charts.append(str(create_chart(session,shrink_datapoints(vals))))
 
     return render_template('history.html',charts=''.join(charts))
+
+
+def shrink_datapoints(values):
+    result = []
+    if len(values) <= 100:
+        return values
+
+    for items in chunk(values, 2):
+        if len(items) < 2: 
+            result.extend(items)
+            break
+        result.append(((items[0][0] + items[1][0])/2, (items[0][1] + items[1][1])/2))
+
+    if len(result) > 100:
+        return shrink_datapoints(result)
+    else:
+        return result
+
+def chunk(sequence, chunk_size):
+    return (sequence[pos:pos + chunk_size] for pos in range(0, len(sequence), chunk_size))
+
 
 def create_chart(session,values):
     chart = pygal.XY()
