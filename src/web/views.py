@@ -30,6 +30,7 @@ class ControllerThread(Thread):
         self.controller.run(self.target)
 
     def stop(self):
+        print('stopping thread...')
         self.controller.stop()
         ControllerThread.running = False
         ControllerThread.instance.join()
@@ -90,6 +91,7 @@ def control():
             ControllerThread.instance.stop()
             print('stopped controller')
 
+        print('starting controller')
         crockpi_controller = ControllerThread()
         target_temp = form.target_temp.data
         crockpi_controller.set_target(target_temp)
