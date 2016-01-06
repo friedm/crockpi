@@ -3,13 +3,13 @@ from .tempsensor import TempSensor
 from .powersupply import PowerSupply
 
 class Controller:
-    def __init__(self,values=None,controller_started=None,measurement_taken=None):
+    def __init__(self,values=None,database=None):
         self.__sensor = TempSensor()
         self.__values = values
         self.__start_time = time.time()
         self.__stop = True
-        self.__controller_started = controller_started
-        self.__measurement_taken = measurement_taken
+        self.__controller_started = database.store_controller_session
+        self.__measurement_taken = database.store_data
         self.__current_session = None
 
     def run(self, target_temp):

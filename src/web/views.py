@@ -1,4 +1,4 @@
-from threading import Thread
+from threading import Thread, Lock
 
 from flask import render_template, redirect, request
 from web import app, models
@@ -7,7 +7,9 @@ import pygal
 from .forms import ControlForm
 
 from .crockpi.controller import Controller
-from database import store_controller_session, store_data
+from database import Database
+
+db_lock = Lock()
 
 class ControllerThread(Thread):
     running = False
@@ -16,7 +18,7 @@ class ControllerThread(Thread):
 
     def __init__(self):
         Thread.__init__(self)
-        self.controller = Controller(values=ControllerThread.data, controller_started=store_controller_session,measurement_taken=store_data)
+        self.controller = Controller(values=ControllerThread.data, database=Database(db_lock))
 
     def set_target(self, target):
         self.target = target
@@ -51,25 +53,31 @@ def index():
 
 @app.route('/_get_chart')
 def get_chart():
-    ControllerThread.data = shrink_datapoints(ControllerThread.data)
-
     chart = pygal.XY()
     chart.title = 'Current Session'
     chart.show_legend = False
     chart.x_title = 'Seconds Since Start'
     chart.y_title = 'Temperature in Fahrenheit'
     chart.style = pygal.style.CleanStyle()
-    chart.add('Temperature', ControllerThread.data)
+    chart.add('Temperature', shrink_datapoints(ControllerThread.data))
 
     return chart.render()
 
 @app.route('/history')
 def history():
     charts = []
-    for session in models.ControlSession.query.all():
+    db_lock.acquire()
+    sessions = models.ControlSession.query.all()
+    db_lock.release()
+
+    for session in sessions:
         vals = []
-        for data in models.Data.query.filter(models.Data.session_id==session.id):
+        db_lock.acquire()
+        session_data = models.Data.query.filter(models.Data.session_id==session.id)
+        db_lock.release()
+        for data in session_data:
             vals.append((data.seconds_since_start, data.value))
+
 
         charts.append(str(create_chart(session,shrink_datapoints(vals))))
 
