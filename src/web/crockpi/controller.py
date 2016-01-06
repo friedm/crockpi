@@ -7,7 +7,7 @@ class Controller:
         self.__sensor = TempSensor()
         self.__values = values
         self.__start_time = time.time()
-        self.__stop = False
+        self.__stop = True
         self.__controller_started = controller_started
         self.__measurement_taken = measurement_taken
         self.__current_session = None
@@ -23,6 +23,8 @@ class Controller:
         this controller assumes that enabling the power will
         increase the temperature of the sensor
         """
+
+        self.__stop = False
 
         print("starting temp controller for", target_temp, "degrees fahrenheit")
         if self.__controller_started:
@@ -46,11 +48,4 @@ class Controller:
     def stop(self):
         print("stopping controller...")
         self.__stop = True
-
-
-
-
-
-
-
 

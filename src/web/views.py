@@ -1,11 +1,48 @@
-from flask import render_template
+from threading import Thread
+
+from flask import render_template, redirect, request
 from web import app, models
 import pygal
+
+from .forms import ControlForm
+
+from .crockpi.controller import Controller
+
+class ControllerThread(Thread):
+    running = False
+    instance = None
+
+    def __init__(self):
+        Thread.__init__(self)
+        self.controller = Controller()
+
+    def set_target(self, target):
+        self.target = target
+
+    def run(self):
+        if ControllerThread.running:
+            return
+
+        ControllerThread.running = True
+        ControllerThread.instance = self
+        self.controller.run(self.target)
+
+    def stop(self):
+        self.controller.stop()
+        ControllerThread.running = False
+        ControllerThread.instance.join()
+        ControllerThread.instance = None
+
+    def get_target(self):
+        return self.target
 
 @app.route('/')
 @app.route('/index')
 def index():
-    return render_template('index.html', target=150)
+    target_temp = '?'
+    if ControllerThread.running:
+        target_temp = ControllerThread.instance.get_target()
+    return render_template('index.html', target=target_temp)
 
 @app.route('/history')
 def history():
@@ -28,3 +65,21 @@ def create_chart(session,values):
     chart.height = 500
     chart.add('Temperature', values)
     return chart.render().decode('utf-8')
+
+@app.route('/control', methods=['GET', 'POST'])
+def control():
+    form = ControlForm()
+    if request.method == 'POST' and form.validate():
+        if ControllerThread.instance:
+            ControllerThread.instance.stop()
+            print('stopped controller')
+
+        crockpi_controller = ControllerThread()
+        target_temp = form.target_temp.data
+        crockpi_controller.set_target(target_temp)
+        crockpi_controller.start()
+
+        return redirect('/index')
+
+    return render_template('control.html', form=form)
+
