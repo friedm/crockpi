@@ -41,6 +41,7 @@ class Controller:
             actual_temp = self.__sensor.read()
             print("actual temp:", actual_temp)
 
+            self.__values.append((time_since_start, actual_temp))
             if self.__measurement_taken:
                 self.__measurement_taken(self.__current_session, time_since_start, actual_temp)
             supply.set(target_temp > actual_temp)

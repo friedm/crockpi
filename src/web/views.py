@@ -7,14 +7,16 @@ import pygal
 from .forms import ControlForm
 
 from .crockpi.controller import Controller
+from database import store_controller_session, store_data
 
 class ControllerThread(Thread):
     running = False
     instance = None
+    data = []
 
     def __init__(self):
         Thread.__init__(self)
-        self.controller = Controller()
+        self.controller = Controller(values=ControllerThread.data, controller_started=store_controller_session,measurement_taken=store_data)
 
     def set_target(self, target):
         self.target = target
@@ -32,9 +34,11 @@ class ControllerThread(Thread):
         ControllerThread.running = False
         ControllerThread.instance.join()
         ControllerThread.instance = None
+        ControllerThread.data = []
 
     def get_target(self):
         return self.target
+
 
 @app.route('/')
 @app.route('/index')
@@ -43,6 +47,18 @@ def index():
     if ControllerThread.running:
         target_temp = ControllerThread.instance.get_target()
     return render_template('index.html', target=target_temp)
+
+@app.route('/_get_chart')
+def get_chart():
+    chart = pygal.XY()
+    chart.title = 'Current Session'
+    chart.show_legend = False
+    chart.x_title = 'Seconds Since Start'
+    chart.y_title = 'Temperature in Fahrenheit'
+    chart.style = pygal.style.CleanStyle()
+    chart.add('Temperature', ControllerThread.data)
+
+    return chart.render()
 
 @app.route('/history')
 def history():

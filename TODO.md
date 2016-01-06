@@ -1,6 +1,5 @@
 # TODO
 
-* index view plots current session
 * index view displays current temp, control session time, etc.
 * index view finds average temp and min/max (after warm up), seconds til warm-up, seconds since warm-up for current run
 * index view pushes fewer data points
