@@ -1,6 +1,13 @@
-import time
+import time, datetime
 from powersupply import PowerSupply
 from tempsensor import TempSensor
+from web import db, models
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+
+Session = sessionmaker()
+Session.configure(bind=create_engine('sqlite:///crockpi.db'))
+db_session = Session()
 
 class Controller:
     def __init__(self,values=None):
@@ -8,6 +15,7 @@ class Controller:
         self.__values = values
         self.__start_time = time.time()
         self.__stop = False
+        self.__session = None
 
     def run(self, target_temp):
         """
@@ -22,9 +30,15 @@ class Controller:
         """
 
         print("starting temp controller for", target_temp, "degrees fahrenheit")
+        self.write_session()
+
         with PowerSupply() as supply:
             self.regulate(target_temp, supply)
 
+    def write_session(self):
+        self.__session = models.ControlSession(time=datetime.datetime.utcnow())
+        db_session.add(self.__session)
+        db_session.commit()
 
     def regulate(self, target_temp, supply):
         while not self.__stop:
@@ -34,9 +48,13 @@ class Controller:
             print("actual temp:", actual_temp)
 
             supply.set(target_temp > actual_temp)
-            self.__values.append((time.time() - self.__start_time,
-                self.__sensor.read()))
+            time_since_start = time.time() - self.__start_time
+            data = models.Data(session=self.__session,
+                    seconds_since_start=time_since_start,
+                    value=self.__sensor.read())
 
+            db_session.add(data)
+            db_session.commit()
 
     def stop(self):
         print("stopping controller...")
