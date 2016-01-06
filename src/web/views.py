@@ -4,7 +4,7 @@ from flask import render_template, redirect, request
 from web import app, models
 import pygal
 
-from .forms import ControlForm
+from .forms import StartForm, StopForm
 
 from .crockpi.controller import Controller
 from database import Database
@@ -115,10 +115,16 @@ def create_chart(session,values):
     chart.add('Temperature', values)
     return chart.render().decode('utf-8')
 
-@app.route('/control', methods=['GET', 'POST'])
+@app.route('/control', methods=['GET'])
 def control():
-    form = ControlForm()
-    if request.method == 'POST' and form.validate():
+    start_form = StartForm()
+    stop_form = StopForm()
+    return render_template('control.html', start_form=start_form, stop_form=stop_form)
+
+@app.route('/_control_start', methods=['POST'])
+def control_start():
+    form = StartForm()
+    if form.validate():
         if ControllerThread.instance:
             ControllerThread.instance.stop()
             print('stopped controller')
@@ -131,5 +137,12 @@ def control():
 
         return redirect('/index')
 
-    return render_template('control.html', form=form)
+@app.route('/_control_stop', methods=['POST'])
+def control_stop():
+    form = StopForm()
+    if form.validate():
+        if ControllerThread.instance:
+            ControllerThread.instance.stop()
+        print('stopped controller')
+    return redirect('/index')
 
