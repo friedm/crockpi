@@ -6,10 +6,8 @@ class Controller:
     def __init__(self,values=None,database=None):
         self.__sensor = TempSensor()
         self.__values = values
-        self.__start_time = time.time()
         self.__stop = True
-        self.__controller_started = database.store_controller_session
-        self.__measurement_taken = database.store_data
+        self.__database = database
         self.__current_session = None
 
     def run(self, target_temp):
@@ -27,24 +25,23 @@ class Controller:
         self.__stop = False
 
         print("starting temp controller for", target_temp, "degrees fahrenheit")
-        if self.__controller_started:
-            self.__current_session = self.__controller_started(datetime.datetime.utcnow(), target_temp)
-
         with PowerSupply() as supply:
             self.regulate(target_temp, supply)
 
     def regulate(self, target_temp, supply):
         while not self.__stop:
-            time.sleep(3)
-
-            time_since_start = time.time() - self.__start_time
+            timestamp = datetime.datetime.now()
             actual_temp = self.__sensor.read()
             print("actual temp:", actual_temp)
 
-            self.__values.append((time_since_start, actual_temp))
-            if self.__measurement_taken:
-                self.__measurement_taken(self.__current_session, time_since_start, actual_temp)
+            self.__values.append((timestamp, actual_temp))
+
+            if self.__database:
+                self.__database.store_data(timestamp, actual_temp)
             supply.set(target_temp > actual_temp)
+
+            time.sleep(3)
+
 
     def stop(self):
         print("stopping controller...")

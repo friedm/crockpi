@@ -1,5 +1,13 @@
 #!/usr/bin/python3
 
 from web import app
-app.run(host='0.0.0.0', port=6080, debug=True, threaded=True)
+from web.worker import cleanup, resume_session
+
+
+resume_session()
+
+app.run(host='0.0.0.0', port=6080, threaded=True, debug=True)
+
+print('cleaning up worker thread')
+cleanup()
 

@@ -3,7 +3,7 @@ from wtforms import FloatField
 from wtforms.validators import DataRequired
 
 class StartForm(Form):
-    target_temp = FloatField('f', validators=[DataRequired()])
+    target_temp = FloatField('target temp', validators=[DataRequired()])
 
 class StopForm(Form):
     pass

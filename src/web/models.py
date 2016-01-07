@@ -9,7 +9,12 @@ class ControlSession(db.Model):
 
 class Data(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    seconds_since_start = db.Column(db.Integer)
+    time = db.Column(TIMESTAMP)
     value = db.Column(db.Float)
     session_id = db.Column(db.Integer, db.ForeignKey('control_session.id'))
+
+class ActiveSession(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    session_id = db.Column(db.Integer, db.ForeignKey('control_session.id'))
+
 
