@@ -44,8 +44,9 @@ def create_chart(values,session=None):
 @app.route('/history')
 def history():
     charts = []
+    current_id = database.get_active_session().id
     db_lock.acquire()
-    sessions = models.ControlSession.query.order_by('time desc').limit(5).all()
+    sessions = models.ControlSession.query.filter(models.ControlSession.id!=current_id).order_by('time desc').limit(5).all()
     db_lock.release()
 
     for session in sessions:
