@@ -11,10 +11,10 @@ from database import Database
 @app.route('/')
 @app.route('/index')
 def index():
-    target_temp = '?'
+    target_temp = '-'
     if worker.ControllerThread.running:
         target_temp = worker.ControllerThread.instance.get_target()
-    return render_template('index.html', target=target_temp)
+    return render_template('index.html', target=target_temp, chart=get_chart().decode('utf-8'))
 
 @app.route('/_get_chart')
 def get_chart():
@@ -63,7 +63,7 @@ def history():
         for data in session_data:
             vals.append((data.time, data.value))
 
-        chart = str(create_chart(shrink_datapoints(process_data_for_charts(vals)),session=session).decode('utf-8'))
+        chart = str(create_chart(process_data_for_charts(vals),session=session).decode('utf-8'))
         charts.append(chart)
         chart_cache[session.id] = chart
 

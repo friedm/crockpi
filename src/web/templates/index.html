@@ -4,7 +4,7 @@
         <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
         <script type=text/javascript>
             $(function() {
-                setInterval(getchart,4000);
+                setInterval(getchart,10000);
             });
             
             function getchart() {
@@ -19,7 +19,7 @@
         {{target}} F  
         <a href="/history">History</a>  
         <a href="/control">Control</a>
-        <div id=chart></div>
+        <div id=chart>{{chart|safe}}</div>
     </body>
 </html>
  
