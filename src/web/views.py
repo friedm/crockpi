@@ -44,6 +44,7 @@ def create_chart(values,session=None):
 
     return chart.render()
 
+chart_cache = {}
 @app.route('/history')
 def history():
     charts = []
@@ -51,13 +52,20 @@ def history():
 
     for session in sessions:
         vals = []
+
+        if session.id in chart_cache:
+            charts.append(chart_cache[session.id])
+            continue
+
         db_lock.acquire()
         session_data = models.Data.query.filter(models.Data.session_id==session.id)
         db_lock.release()
         for data in session_data:
             vals.append((data.time, data.value))
 
-        charts.append(str(create_chart(shrink_datapoints(process_data_for_charts(vals)),session=session).decode('utf-8')))
+        chart = str(create_chart(shrink_datapoints(process_data_for_charts(vals)),session=session).decode('utf-8'))
+        charts.append(chart)
+        chart_cache[session.id] = chart
 
     return render_template('history.html',charts=''.join(charts))
 
