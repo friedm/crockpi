@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        {% block head %}
+        <title>{% block title %}{% endblock %} - crockpi</title>
+        <link rel="stylesheet" href="static/style.css" />
+        <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+        {% endblock %}
+    </head>
+    <body>
+        <p>
+            <a href="/history">History</a>  
+            <a href="/control">Control</a>
+        </p>
+        <div id="content">{% block content %}{% endblock %}</div>
+    </body>
+</html>

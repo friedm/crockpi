@@ -1,16 +1,16 @@
-<html>
-    <body>
-        <form action="{{ url_for('control_start') }}" method="post" name="_control_start">
-            {{ start_form.hidden_tag() }}
-            <p>
-                Target Temp:
-                {{ start_form.target_temp() }} <br>
-            </p>
-            <input type="submit" value="Start Session">
-        </form>
-        <form action="{{ url_for('control_stop') }}" method="post" name="_control_stop">
-            {{ stop_form.hidden_tag() }}
-            <input type="submit" value="Stop Session">
-        </form>
-    </body>
-</html>
+{% extends "base.html" %}
+{% block title %}control{% endblock %}
+{% block content %}
+    <form action="{{ url_for('control_start') }}" method="post" name="_control_start">
+        {{ start_form.hidden_tag() }}
+        <p>
+            Target Temp:
+            {{ start_form.target_temp() }} <br>
+        </p>
+        <input type="submit" value="Start Session">
+    </form>
+    <form action="{{ url_for('control_stop') }}" method="post" name="_control_stop">
+        {{ stop_form.hidden_tag() }}
+        <input type="submit" value="Stop Session">
+    </form>
+{% endblock %}

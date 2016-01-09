@@ -1,9 +1,6 @@
-<html>
-    <head>
-        <title>history</title>
-    </head>
-    <body>
-        {{ charts|safe }}
-    </body>
-</html>
+{% extends "base.html" %}
+{% block title %}history{% endblock %}
+{% block content %}
+    {{ charts|safe }}
+{% endblock %}
 

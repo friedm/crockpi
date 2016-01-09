@@ -1,8 +1,8 @@
-<html>
-    <head>
-        <title>crockpi</title>
-        <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
-        <script type=text/javascript>
+{% extends "base.html" %}
+{% block title %}current session{% endblock %}
+{% block head %}
+    {{ super() }}
+    <script type=text/javascript>
             $(function() {
                 setInterval(getchart,10000);
             });
@@ -13,13 +13,13 @@
                             $("#chart").html(data);
                         });
             }
-        </script>
-    </head>
-    <body>
-        {{target}} F  
-        <a href="/history">History</a>  
-        <a href="/control">Control</a>
-        <div id=chart>{{chart|safe}}</div>
-    </body>
-</html>
+    </script>
+{% endblock %}
+{% block content %}
+<p>
+<div id=container>
+    <div id=left>{{target}}F</div>
+    <div id=chart>{{chart|safe}}</div>
+</div>
+{% endblock %}
  
