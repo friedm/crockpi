@@ -1,5 +1,3 @@
-#!/usr/bin/python3
-
 """
 Control at a certain temperature, without recording any data.
 """

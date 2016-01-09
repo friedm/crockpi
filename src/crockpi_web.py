@@ -1,5 +1,3 @@
-#!/usr/bin/python3
-
 from web import app
 from web.worker import cleanup, resume_session
 
