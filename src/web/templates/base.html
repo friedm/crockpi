@@ -5,6 +5,19 @@
         <title>{% block title %}{% endblock %} - crockpi</title>
         <link rel="stylesheet" href="static/style.css" />
         <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+        <script type=text/javascript>
+            $(function() {
+                gettemp();
+                setInterval(gettemp,2000);
+            });
+
+            function gettemp() {
+                $.get('/_get_temp',
+                        function(data) {
+                            $("#current_temp").html(data + 'F');
+                        });
+            }
+        </script>
         {% endblock %}
     </head>
     <body>
@@ -12,6 +25,10 @@
             <li><a href="/index">current</a></li>
             <li><a href="/history">history</a></li>
             <li><a href="/control">control</a></li>
+            <div id=navbar_status>
+                <li id=current_temp></li>
+                <li id=target_temp></li>
+            </div>
         </ul>
         <div id="content">{% block content %}{% endblock %}</div>
     </body>

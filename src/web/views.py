@@ -1,7 +1,7 @@
 import datetime
 
 from flask import render_template, redirect, request
-from web import app, models, worker, database, db_lock
+from web import app, models, worker, database, db_lock, crockpi
 import pygal
 
 from .forms import StartForm, StopForm
@@ -15,6 +15,11 @@ def index():
     if worker.ControllerThread.running:
         target_temp = worker.ControllerThread.instance.get_target()
     return render_template('index.html', target=target_temp, chart=get_chart().decode('utf-8'))
+
+sensor = crockpi.tempsensor.TempSensor()
+@app.route('/_get_temp')
+def get_temp():
+    return '{0:.2f}'.format(sensor.read())
 
 @app.route('/_get_chart')
 def get_chart():
