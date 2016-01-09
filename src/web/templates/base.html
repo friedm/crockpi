@@ -8,10 +8,11 @@
         {% endblock %}
     </head>
     <body>
-        <p>
-            <a href="/history">History</a>  
-            <a href="/control">Control</a>
-        </p>
+        <ul>
+            <li><a href="/index">current</a></li>
+            <li><a href="/history">history</a></li>
+            <li><a href="/control">control</a></li>
+        </ul>
         <div id="content">{% block content %}{% endblock %}</div>
     </body>
 </html>
