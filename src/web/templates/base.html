@@ -7,14 +7,22 @@
         <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
         <script type=text/javascript>
             $(function() {
-                gettemp();
-                setInterval(gettemp,2000);
+                getTemp();
+                getCurrentSessionString();
+                setInterval(getTemp,2000);
             });
 
-            function gettemp() {
+            function getTemp() {
                 $.get('/_get_temp',
                         function(data) {
-                            $("#current_temp").html(data + 'F');
+                            $("#current_temp").html("<p>" + data + "F</p>");
+                        });
+            }
+
+            function getCurrentSessionString() {
+                $.get('/_get_current_session_string',
+                        function(data) {
+                            $("#current_session").html("<p>" + data + "</p>");
                         });
             }
         </script>
@@ -25,9 +33,9 @@
             <li><a href="/index">current</a></li>
             <li><a href="/history">history</a></li>
             <li><a href="/control">control</a></li>
-            <div id=navbar_status>
-                <li id=current_temp></li>
-                <li id=target_temp></li>
+            <div id=nav_right>
+            <li id=current_session></li>
+            <li id=current_temp></li>
             </div>
         </ul>
         <div id="content">{% block content %}{% endblock %}</div>

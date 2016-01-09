@@ -37,9 +37,8 @@ def process_data_for_charts(values):
 
 def create_chart(values,session=None):
     chart = pygal.TimeDeltaLine()
-    chart.title = 'Current Session'
     if session:
-        chart.title = str(session.target_temp) + session.time.strftime('F %m %d %Y %T')
+        chart.title = session_string(session)
     chart.show_legend = False
     chart.x_title = 'Time'
     chart.y_title = 'Temperature'
@@ -48,6 +47,17 @@ def create_chart(values,session=None):
     chart.add("Temperature", values)
 
     return chart.render()
+
+@app.route('/_get_current_session_string')
+def get_current_session_string():
+    session = database.get_active_session()
+    return session_string(session)
+
+def session_string(session):
+    if not session:
+        return 'no session'
+    return str(session.target_temp) + session.time.strftime('F %m/%d/%Y %H:%M')
+
 
 chart_cache = {}
 @app.route('/history')
