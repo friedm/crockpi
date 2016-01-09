@@ -1,7 +1,6 @@
 import time
 from threading import Thread
 from web import database, db_lock
-from database import Database
 from .crockpi.controller import Controller
 
 class ControllerThread(Thread):
@@ -11,7 +10,6 @@ class ControllerThread(Thread):
 
     def __init__(self):
         Thread.__init__(self)
-        self.controller = Controller(values=ControllerThread.data, database=Database(db_lock))
 
     def set_target(self, target):
         self.target = target
@@ -22,14 +20,16 @@ class ControllerThread(Thread):
 
         ControllerThread.running = True
         ControllerThread.instance = self
+        self.controller = Controller(values=ControllerThread.data, database=database)
         self.controller.run(self.target)
 
     def stop(self):
         print('stopping thread...')
         self.controller.stop()
-        ControllerThread.running = False
+        self.controller = None
         ControllerThread.instance.join()
         ControllerThread.instance = None
+        ControllerThread.running = False
         ControllerThread.data.clear()
 
     def get_target(self):
@@ -53,6 +53,7 @@ def cleanup():
         print('stopped controller')
 
 def resume_session():
+    if ControllerThread.running: return
     current = database.get_active_session()
     if not current: return
 
