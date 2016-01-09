@@ -18,6 +18,9 @@ def index():
 
 @app.route('/_get_chart')
 def get_chart():
+    if len(worker.ControllerThread.data) == 0:
+        return create_chart([])
+
     delta_data = process_data_for_charts(worker.ControllerThread.data)
     return create_chart(delta_data)
 
@@ -44,10 +47,7 @@ def create_chart(values,session=None):
 @app.route('/history')
 def history():
     charts = []
-    current_id = database.get_active_session().id
-    db_lock.acquire()
-    sessions = models.ControlSession.query.filter(models.ControlSession.id!=current_id).order_by('time desc').limit(5).all()
-    db_lock.release()
+    sessions = database.get_latest_sessions()
 
     for session in sessions:
         vals = []
@@ -61,10 +61,10 @@ def history():
 
     return render_template('history.html',charts=''.join(charts))
 
-
 def shrink_datapoints(values):
     result = []
-    if len(values) <= 100:
+    cap = 100
+    if len(values) <= cap:
         return values
 
     for items in chunk(values, 2):
@@ -73,7 +73,7 @@ def shrink_datapoints(values):
             break
         result.append(((items[0][0] + (items[1][0]-items[0][0])/2), (items[0][1] + items[1][1])/2))
 
-    if len(result) > 100:
+    if len(result) > cap:
         return shrink_datapoints(result)
     else:
         return result
@@ -104,5 +104,6 @@ def control_stop():
     form = StopForm()
     if form.validate():
         worker.cleanup()
+        database.delete_active_session()
     return redirect('/control')
 

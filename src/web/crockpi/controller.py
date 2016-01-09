@@ -40,7 +40,7 @@ class Controller:
                 self.__database.store_data(timestamp, actual_temp)
             supply.set(target_temp > actual_temp)
 
-            time.sleep(3)
+            time.sleep(1)
 
 
     def stop(self):
